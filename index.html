@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hurghada Fishing Trip | Live Conditions</title>
+<meta name="theme-color" content="#06162b">
+<meta property="og:title" content="Hurghada Fishing Trip: live wind, waves, moon and fish">
+<meta property="og:description" content="Auto-scored forecast for our trip. Refreshes itself every time you open it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg0:#06162b;--bg1:#0b2a4d;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.1);--txt:#f2f7fc;--mut:#8fb0d1;--gold:#ffd166;--wa:#25d366;
+        --exc:#22c55e;--good:#84cc16;--fair:#f59e0b;--rough:#f97316;--nogo:#ef4444}
+  *{box-sizing:border-box}
+  html,body{margin:0;overflow-x:hidden;background:var(--bg0);color:var(--txt);font-family:Inter,-apple-system,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+  body{background:radial-gradient(1200px 600px at 20% -10%,#1b4f86 0%,transparent 60%),radial-gradient(900px 500px at 100% 20%,#0e6b7a44 0%,transparent 60%),linear-gradient(180deg,var(--bg1),var(--bg0) 60%)}
+  .mono{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 110px}
+  /* hero */
+  .hero{position:relative;padding:22px 0 6px}
+  .kicker{letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--mut);font-weight:600}
+  h1{margin:6px 0 2px;font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  h1 span{background:linear-gradient(90deg,#7dd3fc,#34d399);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dates{color:var(--mut);font-size:15px;margin-top:4px}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#a7f3d0;margin-top:10px;background:rgba(52,211,153,.12);padding:4px 10px;border-radius:999px;border:1px solid rgba(52,211,153,.3)}
+  .dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}70%{box-shadow:0 0 0 8px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+  /* score card */
+  .score{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;margin:18px 0 10px;padding:18px;border-radius:22px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);animation:in .6s ease both}
+  .gauge{position:relative;width:150px;height:150px}
+  .gauge svg{transform:rotate(-90deg)}
+  .gauge .bg{stroke:rgba(255,255,255,.08)}
+  .gauge .fg{stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
+  .gauge .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gauge .num b{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1}
+  .gauge .num small{color:var(--mut);font-size:12px;margin-top:2px}
+  .verdict{font-size:24px;font-weight:800;letter-spacing:-.01em}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--line);color:#dbe7f3}
+  .chip b{color:#fff}
+  /* days */
+  .days{display:grid;gap:12px;margin-top:14px}
+  .day{position:relative;overflow:hidden;padding:16px 16px 12px;border-radius:20px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);animation:in .6s ease both}
+  .day::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+  .day .top{display:flex;justify-content:space-between;align-items:baseline}
+  .day .name{font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .day .name small{color:var(--mut);font-weight:500;font-size:13px;margin-left:6px}
+  .pill{font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;color:#04121f;background:var(--c)}
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0 8px}
+  .stat{background:rgba(0,0,0,.18);border-radius:12px;padding:8px 10px}
+  .stat span{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  .stat b{font-size:16px;font-weight:600;white-space:nowrap}
+  .stat b i{font-style:normal;font-size:11px;color:var(--mut);margin-left:2px}
+  .chart{width:100%;height:64px;display:block}
+  .axis{display:flex;justify-content:space-between;font-size:10px;color:var(--mut);margin-top:2px}
+  .tip{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:var(--gold)}
+  .tip .win{color:#c7f9cc}
+  /* moon + sea */
+  .row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+  .box{padding:16px;border-radius:20px;background:var(--glass);border:1px solid var(--line);animation:in .6s ease both}
+  .box h3{margin:0 0 6px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+  .box .big{font-size:22px;font-weight:800}
+  .box p{margin:6px 0 0;font-size:13px;color:#dbe7f3;line-height:1.4}
+  .moonrow{display:flex;gap:14px;align-items:center}
+  /* fish */
+  h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:22px 0 10px}
+  .fish{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .f{padding:12px;border-radius:16px;background:var(--glass);border:1px solid var(--line)}
+  .f b{display:block;font-size:14px}
+  .f small{color:var(--mut);font-size:12px;line-height:1.35;display:block;margin-top:3px}
+  .foot{color:#6f8fb0;font-size:12px;line-height:1.6;margin-top:22px}
+  .foot b{color:#9fc1e3}
+  /* controls */
+  .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:12px}
+  input[type=date]{background:rgba(255,255,255,.07);color:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 9px;font-family:inherit;font-size:13px;color-scheme:dark}
+  .ghost{background:transparent;border:1px solid var(--line);color:#fff;border-radius:10px;padding:7px 12px;font-size:13px;font-family:inherit}
+  /* share bar */
+  .bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,rgba(6,22,43,.95) 30%);display:flex;gap:10px;justify-content:center}
+  .bar button{font-family:inherit;font-weight:700;font-size:15px;border:0;border-radius:14px;padding:14px 18px;cursor:pointer}
+  .wa{background:var(--wa);color:#04301a;flex:1;max-width:420px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 30px rgba(37,211,102,.3)}
+  .cp{background:rgba(255,255,255,.1);color:#fff;border:1px solid var(--line)!important}
+  #err{display:none;background:#7f1d1d;padding:12px;border-radius:12px;margin-top:12px}
+  .skel{height:120px;border-radius:20px;background:linear-gradient(90deg,var(--glass),rgba(255,255,255,.12),var(--glass));background-size:200% 100%;animation:sh 1.2s infinite;margin-top:14px}
+  @keyframes sh{to{background-position:-200% 0}}
+  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media(max-width:480px){.score{grid-template-columns:120px minmax(0,1fr)}.gauge{width:120px;height:120px}.gauge .num b{font-size:32px}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="kicker">Red Sea · Hurghada · 27.26N 33.81E</div>
+    <h1>Fishing trip <span>conditions</span></h1>
+    <div class="dates" id="dates">Loading...</div>
+    <div class="live"><span class="dot"></span> Live forecast, refreshes on every open</div>
+    <div class="ctl">Trip <input type="date" id="start"> to <input type="date" id="end"> <button class="ghost" onclick="go()">Update</button></div>
+  </div>
+  <div id="err"></div>
+  <div id="out"><div class="skel"></div><div class="skel"></div></div>
+  <h2>What's biting in October</h2>
+  <div class="fish" id="fish"></div>
+  <div class="foot">
+    <b>How the score works.</b> 0-10 per day for a small boat: full marks under 10 kt, minus 0.6 per knot above, minus for gusts over 25 kt and waves over 0.6 m. Wind guide: &lt;10 kt flat · 10-15 nice · 15-20 choppy · 20+ hold on.<br>
+    Data: Open-Meteo weather + marine models, pulled live by your phone. <span id="stamp"></span><br>
+    Built with AI by M.Essam. Forecasts beyond 5 days move; trust the pattern, recheck the numbers.
+  </div>
+</div>
+<div class="bar">
+  <button class="wa" onclick="share()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#04301a"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.8-1.4.1-.2 0-.3 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.1.6 2.8.5a2.4 2.4 0 0 0 1.6-1.1 2 2 0 0 0 .1-1.1c0-.2-.2-.2-.4-.3z"/></svg> Share on WhatsApp</button>
+  <button class="cp" onclick="copyTxt()">Copy</button>
+</div>
+<script>
+const LAT=27.2579,LON=33.8116,KT=1/1.852;
+const FISH=[["Kingfish · Dirak","Trolling at dawn and dusk along reef drop-offs"],["Yellowfin & dogtooth tuna","Trolling or jigging off the outer reefs"],["Barracuda","Trolling along reef edges"],["Giant trevally · GT","Popping and jigging on reef points"],["Grouper · Wakar","Bottom fishing, 20-60 m"],["Red snapper · Bohar","Bottom fishing at night or first light"],["Emperor · Sha'our","Bottom fishing on sand patches near reef"]];
+const COL={EXCELLENT:"#22c55e",GOOD:"#84cc16",FAIR:"#f59e0b",ROUGH:"#f97316","NO-GO":"#ef4444"};
+let lastText="";
+const q=new URLSearchParams(location.search);
+start.value=q.get('start')||'2026-10-08'; end.value=q.get('end')||'2026-10-11';
+fish.innerHTML=FISH.map(f=>`<div class="f"><b>${f[0]}</b><small>${f[1]}</small></div>`).join('');
+
+function moon(d){const ref=Date.UTC(2000,0,6,18,14),P=29.530588853;const age=(((d-ref)/864e5)%P+P)%P;
+ const il=(1-Math.cos(2*Math.PI*age/P))/2;
+ const n=age<1.85||age>27.7?"New moon":age<5.5?"Waxing crescent":age<9.2?"First quarter":age<12.9?"Waxing gibbous":age<16.6?"Full moon":age<20.3?"Waning gibbous":age<24?"Last quarter":"Waning crescent";
+ return {il,n,waxing:age<P/2};}
+function moonSvg(f,waxing,r=28){const rx=Math.abs(r*(2*f-1)),side=waxing?1:0,sw2=f>.5?side:1-side;
+ return `<svg width="${r*2+4}" height="${r*2+4}" viewBox="${-r-2} ${-r-2} ${r*2+4} ${r*2+4}"><circle r="${r}" fill="#0b1f36" stroke="rgba(255,255,255,.15)"/><path d="M0,${-r} A${r},${r} 0 0 ${side} 0,${r} A${rx},${r} 0 0 ${sw2} 0,${-r} Z" fill="#fde68a"/></svg>`;}
+const comp=d=>["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(d/22.5)%16];
+function score(w,g,wv){let s=10;if(w>10)s-=(w-10)*.6;if(g>25)s-=(g-25)*.15;if(wv!=null&&wv>.6)s-=(wv-.6)*3;return Math.max(0,Math.min(10,Math.round(s*10)/10));}
+const verdict=s=>s>=8?["EXCELLENT","Calm. Go anywhere, outer reefs are on."]:s>=6?["GOOD","Fishable. Expect some chop offshore."]:s>=4?["FAIR","Stay in the lee of reefs and islands."]:s>=2?["ROUGH","Inshore only, early hours."]:["NO-GO","Stay in the marina."];
+const fmt=(d,o)=>new Date(d+"T12:00:00").toLocaleDateString('en-GB',o);
+function chart(hrs,sr,ss){const W=320,H=64,mx=Math.max(25,...hrs.map(x=>x[1]));const pts=hrs.map((x,i)=>[i/(hrs.length-1)*W,H-4-(x[1]/mx)*(H-10)]);
+ const sX=(+sr.slice(0,2)+(+sr.slice(3))/60)/24*W,eX=(+ss.slice(0,2)+(+ss.slice(3))/60)/24*W;
+ let d=`M${pts[0][0]},${pts[0][1]}`;for(let i=1;i<pts.length;i++){const [x0,y0]=pts[i-1],[x1,y1]=pts[i],cx=(x0+x1)/2;d+=` C${cx},${y0} ${cx},${y1} ${x1},${y1}`;}
+ const lines=[10,15,20].map(k=>{const y=H-4-(k/mx)*(H-10);return `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 4"/>`}).join('');
+ return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7dd3fc" stop-opacity=".55"/><stop offset="1" stop-color="#7dd3fc" stop-opacity="0"/></linearGradient></defs>
+ <rect x="0" y="0" width="${sX}" height="${H}" fill="rgba(0,0,0,.25)"/><rect x="${eX}" y="0" width="${W-eX}" height="${H}" fill="rgba(0,0,0,.25)"/>${lines}
+ <path d="${d} L${W},${H} L0,${H} Z" fill="url(#g)"/><path d="${d}" fill="none" stroke="#7dd3fc" stroke-width="2"/></svg>`;}
+
+async function go(){
+ const st=start.value,en=end.value;err.style.display='none';history.replaceState(null,'',`?start=${st}&end=${en}`);
+ try{
+  const [w,m]=await Promise.all([
+   fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&timezone=Africa%2FCairo&forecast_days=16&daily=wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&hourly=wind_speed_10m`).then(r=>r.json()),
+   fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${LAT}&longitude=${LON}&timezone=Africa%2FCairo&forecast_days=10&daily=wave_height_max&hourly=sea_surface_temperature`).then(r=>r.json())]);
+  const wd=w.daily,md=m.daily,rows=[];
+  for(let d=new Date(st+"T12:00:00");d<=new Date(en+"T12:00:00");d.setDate(d.getDate()+1)){
+   const iso=d.toISOString().slice(0,10),i=wd.time.indexOf(iso);if(i<0){rows.push({iso,missing:true});continue;}
+   const j=md.time.indexOf(iso),wk=wd.wind_speed_10m_max[i]*KT,gk=wd.wind_gusts_10m_max[i]*KT,wv=j>=0?md.wave_height_max[j]:null;
+   const s=score(wk,gk,wv),[v,tip]=verdict(s);
+   const hrs=w.hourly.time.map((t,k)=>[t,w.hourly.wind_speed_10m[k]*KT]).filter(x=>x[0].startsWith(iso));
+   let best=null;const day=hrs.filter(x=>{const h=+x[0].slice(11,13);return h>=5&&h<=18});
+   for(let k=0;k+3<day.length;k++){const a=(day[k][1]+day[k+1][1]+day[k+2][1]+day[k+3][1])/4;if(!best||a<best[2])best=[day[k][0].slice(11,16),day[k+3][0].slice(11,16),a];}
+   rows.push({iso,wk,gk,wv,dir:comp(wd.wind_direction_10m_dominant[i]),tmax:wd.temperature_2m_max[i],tmin:wd.temperature_2m_min[i],rain:wd.precipitation_probability_max[i],sr:wd.sunrise[i].slice(11,16),ss:wd.sunset[i].slice(11,16),s,v,tip,best,hrs});
+  }
+  const ok=rows.filter(r=>!r.missing);if(!ok.length)throw new Error("Trip dates are outside the 16-day forecast window.");
+  const avg=ok.reduce((a,r)=>a+r.s,0)/ok.length,[ov,ovTip]=verdict(avg);
+  const bestD=ok.reduce((a,r)=>r.s>a.s?r:a),worstD=ok.reduce((a,r)=>r.s<a.s?r:a);
+  const mid=ok[Math.floor(ok.length/2)],mo=moon(new Date(mid.iso+"T12:00:00"));
+  const sstA=m.hourly.sea_surface_temperature.filter(x=>x!=null),sst=sstA.length?sstA.reduce((a,b)=>a+b)/sstA.length:null;
+  const moonTip=mo.il<.3?"Dark nights: strong dawn and dusk bite, best week of the month for night bottom fishing.":mo.il>.7?"Bright nights: fish feed after dark, so work the dawn bite hard.":"Mid-cycle moon, standard dawn and dusk pattern.";
+  dates.textContent=`${fmt(st,{weekday:'long',day:'numeric'})} to ${fmt(en,{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+  const C=2*Math.PI*62;
+  let h=`<div class="score"><div class="gauge"><svg width="100%" height="100%" viewBox="0 0 150 150"><circle class="bg" cx="75" cy="75" r="62" fill="none" stroke-width="12"/><circle class="fg" id="ring" cx="75" cy="75" r="62" fill="none" stroke="${COL[ov]}" stroke-width="12" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><div class="num"><b>${avg.toFixed(1)}</b><small>out of 10</small></div></div>
+   <div><div class="kicker">Trip verdict</div><div class="verdict" style="color:${COL[ov]}">${ov}</div><div style="font-size:13px;color:#dbe7f3;margin-top:4px">${ovTip}</div>
+   <div class="chips"><span class="chip">Best day <b>${fmt(bestD.iso,{weekday:'short',day:'numeric'})}</b> ${bestD.s}</span><span class="chip">Toughest <b>${fmt(worstD.iso,{weekday:'short',day:'numeric'})}</b> ${worstD.s}</span><span class="chip">Wind mostly <b>${bestD.dir}</b></span></div></div></div><div class="days">`;
+  rows.forEach((r,k)=>{
+   if(r.missing){h+=`<div class="day" style="--c:#475569"><div class="top"><div class="name">${fmt(r.iso,{weekday:'short',day:'numeric',month:'short'})}</div><span class="pill">BEYOND RANGE</span></div><div class="tip">Forecast not available yet, open again closer to the date.</div></div>`;return;}
+   h+=`<div class="day" style="--c:${COL[r.v]};animation-delay:${.1+k*.08}s"><div class="top"><div class="name">${fmt(r.iso,{weekday:'long'})}<small>${fmt(r.iso,{day:'numeric',month:'short'})}</small></div><span class="pill">${r.v} ${r.s}</span></div>
+   <div class="stats"><div class="stat"><span>Wind</span><b>${r.wk.toFixed(0)}<i>kt ${r.dir}</i></b></div><div class="stat"><span>Gusts</span><b>${r.gk.toFixed(0)}<i>kt</i></b></div><div class="stat"><span>Waves</span><b>${r.wv!=null?r.wv.toFixed(1):'–'}<i>m</i></b></div><div class="stat"><span>Air</span><b>${r.tmin.toFixed(0)}–${r.tmax.toFixed(0)}<i>°C</i></b></div></div>
+   ${chart(r.hrs,r.sr,r.ss)}<div class="axis"><span>00h</span><span>06h</span><span>12h</span><span>18h</span><span>24h</span></div>
+   <div class="tip"><span>${r.tip}</span>${r.best?`<span class="win">Calmest ${r.best[0]}–${r.best[1]} · ~${r.best[2].toFixed(0)} kt</span>`:''}</div></div>`;});
+  h+=`</div><div class="row2"><div class="box" style="animation-delay:.5s"><h3>Moon</h3><div class="moonrow">${moonSvg(mo.il,mo.waxing)}<div><div class="big">${mo.n}</div><div style="color:var(--mut);font-size:12px">${(mo.il*100).toFixed(0)}% lit</div></div></div><p>${moonTip}</p></div>
+   <div class="box" style="animation-delay:.6s"><h3>Sea</h3><div class="big">${sst?sst.toFixed(0)+'°C':'–'}</div><div style="color:var(--mut);font-size:12px">surface temperature</div><p>${sst&&sst>=25?'Warm water, pelagics still hunting. October is prime season in the Red Sea.':'Cooling water, work the deeper reef edges.'}</p></div></div>`;
+  out.innerHTML=h;setTimeout(()=>{ring.style.strokeDashoffset=C*(1-avg/10)},80);
+  stamp.textContent=`Loaded ${new Date().toLocaleString('en-GB',{timeZone:'Africa/Cairo',dateStyle:'medium',timeStyle:'short'})} Cairo.`;
+  lastText=`🎣 *Hurghada trip: ${fmt(st,{day:'numeric'})}–${fmt(en,{day:'numeric',month:'short'})}*\nVerdict: *${ov}* ${avg.toFixed(1)}/10\n`+ok.map(r=>`${fmt(r.iso,{weekday:'short',day:'numeric'})}: ${r.v} ${r.s} · ${r.wk.toFixed(0)} kt ${r.dir}, gusts ${r.gk.toFixed(0)}${r.wv!=null?', waves '+r.wv.toFixed(1)+' m':''}${r.best?' · calmest '+r.best[0]+'–'+r.best[1]:''}`).join('\n')+`\n🌙 ${mo.n}. ${moonTip}\nLive page (updates itself): ${location.href}`;
+ }catch(e){err.textContent="Could not load forecast: "+e.message;err.style.display='block';out.innerHTML='';}
+}
+function share(){const u="https://wa.me/?text="+encodeURIComponent(lastText||location.href);if(navigator.share){navigator.share({title:'Hurghada fishing trip',text:lastText,url:location.href}).catch(()=>window.open(u));}else window.open(u);}
+function copyTxt(){navigator.clipboard.writeText(lastText).then(()=>alert('Copied. Paste into WhatsApp.'));}
+go();
+</script>
+</body>
+</html>
